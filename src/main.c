@@ -1,11 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <windows.h>
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
 
 int main() {
-    printf("Hello");
     if (!glfwInit()){
         printf("Failed to initialize GLFW.");
         exit(EXIT_FAILURE);
@@ -19,9 +17,14 @@ int main() {
 
     glfwMakeContextCurrent(window);
 
+    // Glad Loads OpenGL into GLFW process
     gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
 
-    Sleep(10000);
+    while (!glfwWindowShouldClose((window))){
+        glClear(GL_COLOR_BUFFER_BIT);
+        glfwSwapBuffers(window);
+        glfwPollEvents();
 
-    printf("complete");
+    }
+
 }
