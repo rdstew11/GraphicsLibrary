@@ -8,9 +8,13 @@ set(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/bin")
 
 find_library(GLFW glfw3)
 find_library(GDI gdi32)
+find_library(OpenGL opengl32)
 
-add_executable(GraphicsLibrary ${SRC_DIR}/main.c glad.c)
+add_executable(GraphicsLibrary ${SRC_DIR}/main.c glad.c
+        src/shaderprogram.h
+        src/shaderprogram.c)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_link_libraries(GraphicsLibrary ${GLFW})
 target_link_libraries(GraphicsLibrary ${GDI})
+target_link_libraries(GraphicsLibrary ${OpenGL})
