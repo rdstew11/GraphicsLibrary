@@ -7,8 +7,9 @@
 
 struct ShaderProgram{
     GLuint program;
+
 };
 
 void initShaderProgram();
 
-GLuint initShader();
+GLuint initShader(GLenum type, const char* path);
