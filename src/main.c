@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include <GLFW/glfw3.h>
 #include "glad/glad.h"
+#include <GLFW/glfw3.h>
 
 #include "shaderprogram.h"
 
@@ -15,18 +15,6 @@ static void frameResizeCallback(GLFWwindow* window, int width, int height){
 static void processInput(GLFWwindow* window){
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
         glfwSetWindowShouldClose(window, true);
-    }
-}
-
-
-static void checkProgramInitStatus(GLuint program){
-    int success;
-    char infoLog[512];
-    glGetProgramiv(program, GL_LINK_STATUS, &success);
-
-    if(!success){
-        glGetProgramInfoLog(program, sizeof(infoLog), NULL, infoLog);
-        printf("%s", infoLog);
     }
 }
 
@@ -44,8 +32,8 @@ static void GLAPIENTRY debugCallback( GLenum source,
 
 int main() {
 
-    const char* vertSourcePath = "";
-    const char* fragSourcePath = "";
+    const char* fragSourcePath = "src/shaders/shader1.frag";
+    const char* vertSourcePath = "src/shaders/shader1.vert";
 
     if (!glfwInit()){
         printf("Failed to initialize GLFW.");
@@ -93,7 +81,7 @@ int main() {
     };
 
     GLuint vertShader = initShader(GL_VERTEX_SHADER, vertSourcePath);
-    GLuint fragShader =initShader(GL_FRAGMENT_SHADER, fragSourcePath);
+    GLuint fragShader = initShader(GL_FRAGMENT_SHADER, fragSourcePath);
 
     GLuint program = glCreateProgram();
     glAttachShader(program, fragShader);
@@ -129,7 +117,7 @@ int main() {
 
 
 
-
+    printProgramLog(program);
 
     while (!glfwWindowShouldClose((window))){
 
