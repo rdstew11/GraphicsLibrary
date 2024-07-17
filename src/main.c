@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <math.h>
 
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
@@ -71,9 +72,10 @@ int main() {
 
     // 2 Triangles, 1 Square
     float vertices[] =  {
-            -0.5f, -0.5f, 0.0f,
-            0.5f, -0.5f, 0.0f,
-            0.0f, 0.5f, 0.0f
+         // positions       // colors
+         0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom left
+         0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f // top
     };
 
     int indices[] = {
@@ -91,47 +93,65 @@ int main() {
     glDeleteShader(fragShader);
     glDeleteShader(vertShader);
 
+    /**
+     *  Vertex Attribute Objects (VAOs) hold vertex attribute pointers and element buffer object pointers
+     *  Attribute pointers point to specific sections of the Vertex Buffer objects
+     *  that contain data for the corresponding attribute.
+     */
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-
+    /**
+     *  Vertex Buffer Objects (VBOs) are raw buffers containing vertex data
+     */
     GLuint vbo1;
     glGenBuffers(1, &vbo1);
     glBindBuffer(GL_ARRAY_BUFFER, vbo1);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    /**
+     *  Element Buffer Objects (EBOs) are a buffer indicating in which order to render vertices.
+     */
+    GLuint ebo1;
+    glGenBuffers(1, &ebo1);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo1);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) 0);
+    // Position Attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) 0);
     glEnableVertexAttribArray(0);
 
+    // Color Attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) (3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     glUseProgram(program);
     glBindVertexArray(vao);
     checkProgramInitStatus(program);
 
-    printf("Drawing triangles\n");
-
     glDrawArrays(GL_TRIANGLES, 0,3);
-
-
-
 
     printProgramLog(program);
 
     while (!glfwWindowShouldClose((window))){
+        float timeValue = (float) glfwGetTime();
+        float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
+        int vertexColorLocation = glGetUniformLocation(program, "inputColor");
 
         glUseProgram(program);
+        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
         glBindVertexArray(vao);
 
         processInput(window);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawArrays(GL_TRIANGLES, 0,3);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo1);
+        glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
-
     }
 
     glfwTerminate();

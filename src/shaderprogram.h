@@ -5,12 +5,14 @@
 
 #include "glad/glad.h"
 
-struct ShaderProgram{
+typedef struct {} Uniform;
+
+typedef struct{
     GLuint program;
+} ShaderProgram;
 
-};
+ShaderProgram initShaderProgram();
 
-void initShaderProgram();
 
 GLuint initShader(GLenum type, const char* path);
 void checkProgramInitStatus(GLuint program);

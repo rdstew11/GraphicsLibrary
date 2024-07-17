@@ -1,5 +1,6 @@
 #include "shaderprogram.h"
 #include <stdio.h>
+#include <string.h>
 #include <malloc.h>
 
 static void checkShaderCompileStatus(GLuint shader){
@@ -13,26 +14,36 @@ static void checkShaderCompileStatus(GLuint shader){
     }
 }
 
+
 static const char* readFile(const char* path){
     char * buffer = 0;
+    char* newBuffer = NULL;
     long length;
     FILE * fin = fopen(path, "rb");
 
     if (fin) {
         fseek(fin, 0, SEEK_END);
-        length = ftell(fin) + 1;
+        length = ftell(fin);
         fseek(fin, 0, SEEK_SET);
-        buffer = malloc(length);
+        buffer = malloc(sizeof(char) * length);
 
         if(buffer) {
-            fread(buffer, 1, length, fin);
-            buffer[length] = '\0';
+            int c;
+            int counter = 0;
+            while((c = fgetc(fin)) != EOF){
+                if (c != '\r'){
+                    buffer[counter] = (char) c;
+                    counter++;
+                }
+            }
+            newBuffer = realloc(buffer, counter);
+            newBuffer[counter] = '\0';
         }
         fclose(fin);
     }
 
-    if(buffer){
-        return buffer;
+    if(newBuffer){
+        return newBuffer;
     } else {
         printf("Failed to read from: %s\n", path);
         exit(1);
@@ -42,11 +53,11 @@ static const char* readFile(const char* path){
 GLuint initShader(GLenum type, const char* path){
     const char* source = readFile(path);
 
-    printf("Path: %s, Contents:\n%s\n", path, source);
-
     GLuint shader = glCreateShader(type);
     glShaderSource(shader, 1, &source, NULL);
     glCompileShader(shader);
+    free((void * )source);
+    source = NULL;
 
     checkShaderCompileStatus(shader);
     return shader;
