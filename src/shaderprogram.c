@@ -19,7 +19,7 @@ static const char* readFile(const char* path){
     char * buffer = 0;
     char* newBuffer = NULL;
     long length;
-    FILE * fin = fopen(path, "rb");
+    FILE * fin = fopen(path, "r");
 
     if (fin) {
         fseek(fin, 0, SEEK_END);
@@ -28,16 +28,9 @@ static const char* readFile(const char* path){
         buffer = malloc(sizeof(char) * length);
 
         if(buffer) {
-            int c;
-            int counter = 0;
-            while((c = fgetc(fin)) != EOF){
-                if (c != '\r'){
-                    buffer[counter] = (char) c;
-                    counter++;
-                }
-            }
-            newBuffer = realloc(buffer, counter);
-            newBuffer[counter] = '\0';
+            const size_t fileLength = fread(buffer, 1, length, fin);
+            newBuffer = realloc(buffer, fileLength + 1);
+            newBuffer[fileLength] = '\0';
         }
         fclose(fin);
     }
