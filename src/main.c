@@ -7,7 +7,7 @@
 #include <GLFW/glfw3.h>
 
 #include "shaderprogram.h"
-
+//#include "stb_image.h"
 
 static void frameResizeCallback(GLFWwindow* window, int width, int height){
     glViewport(0, 0, width, height);
@@ -35,6 +35,7 @@ int main() {
 
     const char* fragSourcePath = "src/shaders/shader1.frag";
     const char* vertSourcePath = "src/shaders/shader1.vert";
+    const char* texturePath = "assets/cat.jpg";
 
     if (!glfwInit()){
         printf("Failed to initialize GLFW.");
@@ -73,13 +74,19 @@ int main() {
     // 2 Triangles, 1 Square
     float vertices[] =  {
          // positions       // colors
-         0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom left
-         0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f // top
+     0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom right
+    -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom left
+    0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f // top
     };
 
     int indices[] = {
-            0, 1, 2
+    0, 1, 2
+    };
+
+    float textureCoords[] = {
+        0.0f, 0.0f, // lower-left corner
+        1.0f, 0.0f, // lower-right corner
+        0.5f, 1.0f // top-center corner
     };
 
     GLuint vertShader = initShader(GL_VERTEX_SHADER, vertSourcePath);
@@ -125,6 +132,25 @@ int main() {
     // Color Attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) (3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
+//    // Load Texture
+//    int textureWidth, textureHeight, nrChannels;
+//    unsigned  char *data = stbi_load(texturePath, &textureWidth, &textureHeight, &nrChannels, 0);
+//
+//    // Texture Attribute
+//    GLuint texture1;
+//    glGenTextures(1, &texture1);
+//    glBindTexture(GL_TEXTURE_2D, texture1);
+//
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+//    glGenerateMipmap(GL_TEXTURE_2D);
+//
+//    stbi_image_free(data);
+//
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     glUseProgram(program);
     glBindVertexArray(vao);

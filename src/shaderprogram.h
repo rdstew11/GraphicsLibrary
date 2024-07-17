@@ -13,7 +13,6 @@ typedef struct{
 
 ShaderProgram initShaderProgram();
 
-
 GLuint initShader(GLenum type, const char* path);
 void checkProgramInitStatus(GLuint program);
 void printProgramLog(GLuint program);
