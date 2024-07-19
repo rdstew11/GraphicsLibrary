@@ -1,10 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <time.h>
 #include <math.h>
 
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
+
+#include <cglm/vec4.h>
+#include <cglm/mat4.h>
+#include <cglm/affine.h>
+#include <cglm/util.h>
 
 #include "shaderprogram.h"
 
@@ -31,10 +37,27 @@ static void GLAPIENTRY debugCallback( GLenum source,
     fprintf( stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
         ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ), type, severity, message );
 }
+static void matrixFun(){
+    vec4 input = {1.0f, 0.0f, 0.0f, 1.0f};
+    mat4 identity = GLM_MAT4_IDENTITY_INIT;
+    vec4 output = {0.0f, 0.0f, 0.0f, 0.0f};
+
+    mat4 scaleup = {{2.0f, 0.0f, 0.0f, 0.0f,},
+                    {0.0f, 2.0f, 0.0f, 0.0f,},
+                    {0.0f, 0.0f, 2.0f, 0.0f,},
+                    {0.0f, 0.0f, 0.0f, 1.0f,}};
+
+    vec3 translateVector = {1.0f, 1.0f, 0.0f};
+    glm_translate_make(identity, translateVector);
+//    glm_mat4_mulv(scaleup, input, output);
+
+    glm_mat4_mulv(identity, input, output);
 
 
-int main() {
+    printf("done\n");
+}
 
+static void shaderLoop(){
     const char* fragSourcePath = "src/shaders/shader1.frag";
     const char* vertSourcePath = "src/shaders/shader1.vert";
     const char* texturePath = "assets/cat.jpg";
@@ -75,23 +98,28 @@ int main() {
 
     // 2 Triangles, 1 Square
     float vertices[] =  {
-         // positions       // colors
-      0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,// Top right
-      0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,// bottom right
-    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, // bottom left
-    -0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f // top left
+            // positions       // colors
+            0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,// Top right
+            0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,// Bottom right
+            -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // Bottom left
+            -0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, // Top Left
     };
 
     int indices[] = {
-    0, 1, 2,
-    0, 1, 3,
+            0, 1, 2,
+            0, 3 ,2
     };
 
-    float textureCoords[] = {
-        0.0f, 0.0f, // lower-left corner
-        1.0f, 0.0f, // lower-right corner
-        0.5f, 1.0f // top-center corner
-    };
+    // Initialize Matrix Math inputs
+    vec4 input = {1.0f, 0.0f, 0.0f, 1.0f};
+    mat4 translationMatrix = GLM_MAT4_IDENTITY_INIT;
+    vec3 translateVector = {0.25f, 0.25f, 0.0f};
+    vec3 scaleVector = {0.5f, 0.5f, 0.5f};
+
+    glm_translate_make(translationMatrix, translateVector);
+
+    glm_rotate_z(translationMatrix, glm_rad(130.0f), translationMatrix);
+    glm_scale(translationMatrix, scaleVector);
 
     GLuint vertShader = initShader(GL_VERTEX_SHADER, vertSourcePath);
     GLuint fragShader = initShader(GL_FRAGMENT_SHADER, fragSourcePath);
@@ -130,11 +158,11 @@ int main() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // Position Attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) 0);
     glEnableVertexAttribArray(0);
 
     // Color Attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) (3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) (3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
     // Load Texture
@@ -163,17 +191,45 @@ int main() {
     glBindVertexArray(vao);
     checkProgramInitStatus(program);
 
+    int transformLocation = glGetUniformLocation(program, "transform");
+    glUniformMatrix4fv(transformLocation, 1, GL_FALSE, translationMatrix[0]);
+
+    glFrontFace(GL_CW); // Triangle Face Directions
+
     glDrawArrays(GL_TRIANGLES, 0,3);
 
     printProgramLog(program);
 
+
+    time_t startTime, currentTime;
+    time ( &startTime );
+    currentTime = startTime;
+    float angle = 0.0f;
+
+
     while (!glfwWindowShouldClose((window))){
-        float timeValue = (float) glfwGetTime();
-        float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-        int vertexColorLocation = glGetUniformLocation(program, "inputColor");
+//        float timeValue = (float) glfwGetTime();
+//        float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
+//        int vertexColorLocation = glGetUniformLocation(program, "inputColor");
 
         glUseProgram(program);
-        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+//        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+
+
+        time ( &currentTime );
+        angle = (currentTime - startTime) * 10;
+//        angle = fmod(angle + (float) rawtime, 360.0f);
+
+        mat4 newTranslationMatrix = GLM_MAT4_IDENTITY_INIT;
+        vec3 newTranslateVector = {0.25f, 0.25f, 0.0f};
+        vec3 scaleVector = {0.5f, 0.5f, 0.5f};
+
+        glm_translate_make(newTranslationMatrix, newTranslateVector);
+
+        glm_rotate_z(newTranslationMatrix, glm_rad(angle), newTranslationMatrix);
+        glm_scale(newTranslationMatrix, scaleVector);
+        glUniformMatrix4fv(transformLocation, 1, GL_FALSE, newTranslationMatrix[0]);
+
 
         glBindTexture(GL_TEXTURE_2D, texture1);
         glBindVertexArray(vao);
@@ -191,6 +247,11 @@ int main() {
 
     glfwTerminate();
     exit(EXIT_SUCCESS);
+}
+
+int main() {
+//    matrixFun();
+    shaderLoop();
 }
 
 
