@@ -7,7 +7,6 @@
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
 
-#include <cglm/vec4.h>
 #include <cglm/mat4.h>
 #include <cglm/affine.h>
 #include <cglm/util.h>
@@ -218,7 +217,6 @@ static void shaderLoop(){
 
         time ( &currentTime );
         angle = (currentTime - startTime) * 10;
-//        angle = fmod(angle + (float) rawtime, 360.0f);
 
         mat4 newTranslationMatrix = GLM_MAT4_IDENTITY_INIT;
         vec3 newTranslateVector = {0.25f, 0.25f, 0.0f};
