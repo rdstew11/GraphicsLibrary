@@ -12,9 +12,11 @@ find_library(GLFW glfw3)
 find_library(GDI gdi32)
 find_library(OpenGL opengl32)
 
-add_executable(GraphicsLibrary ${SRC_DIR}/main.c glad.c
-        src/shaderprogram.h
+add_executable(GraphicsLibrary ${SRC_DIR}/main.c external/glad.c
+        include/shaderprogram.h
         src/shaderprogram.c
+        include/object.h
+        src/object.c
 )
 
 add_subdirectory(external/cglm)

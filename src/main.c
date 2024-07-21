@@ -2,9 +2,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
-#include <math.h>
 
-#include "glad/glad.h"
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <cglm/mat4.h>
@@ -94,7 +93,6 @@ static void shaderLoop(){
 
     glfwSetFramebufferSizeCallback(window, frameResizeCallback);
 
-
     // 2 Triangles, 1 Square
     float vertices[] =  {
             // positions       // colors
@@ -110,7 +108,6 @@ static void shaderLoop(){
     };
 
     // Initialize Matrix Math inputs
-    vec4 input = {1.0f, 0.0f, 0.0f, 1.0f};
     mat4 translationMatrix = GLM_MAT4_IDENTITY_INIT;
     vec3 translateVector = {0.25f, 0.25f, 0.0f};
     vec3 scaleVector = {0.5f, 0.5f, 0.5f};
@@ -120,16 +117,7 @@ static void shaderLoop(){
     glm_rotate_z(translationMatrix, glm_rad(130.0f), translationMatrix);
     glm_scale(translationMatrix, scaleVector);
 
-    GLuint vertShader = initShader(GL_VERTEX_SHADER, vertSourcePath);
-    GLuint fragShader = initShader(GL_FRAGMENT_SHADER, fragSourcePath);
-
-    GLuint program = glCreateProgram();
-    glAttachShader(program, fragShader);
-    glAttachShader(program, vertShader);
-    glLinkProgram(program);
-
-    glDeleteShader(fragShader);
-    glDeleteShader(vertShader);
+    ShaderProgram program = initShaderProgram(vertSourcePath, fragSourcePath);
 
     /**
      *  Vertex Attribute Objects (VAOs) hold vertex attribute pointers and element buffer object pointers
@@ -188,17 +176,11 @@ static void shaderLoop(){
 
     glUseProgram(program);
     glBindVertexArray(vao);
-    checkProgramInitStatus(program);
 
     int transformLocation = glGetUniformLocation(program, "transform");
     glUniformMatrix4fv(transformLocation, 1, GL_FALSE, translationMatrix[0]);
 
-    glFrontFace(GL_CW); // Triangle Face Directions
-
-    glDrawArrays(GL_TRIANGLES, 0,3);
-
-    printProgramLog(program);
-
+    // Triangle Face Directions
 
     time_t startTime, currentTime;
     time ( &startTime );

@@ -3,18 +3,6 @@
 #include <string.h>
 #include <malloc.h>
 
-static void checkShaderCompileStatus(GLuint shader){
-    int success;
-    char infoLog[512];
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-
-    if(!success){
-        glGetShaderInfoLog(shader, sizeof(infoLog), NULL, infoLog);
-        printf("%s", infoLog);
-    }
-}
-
-
 static const char* readFile(const char* path){
     char * buffer = 0;
     char* newBuffer = NULL;
@@ -43,7 +31,19 @@ static const char* readFile(const char* path){
     }
 }
 
-GLuint initShader(GLenum type, const char* path){
+static void checkShaderCompileStatus(GLuint shader){
+    int success;
+    char infoLog[512];
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+
+    if(!success){
+        glGetShaderInfoLog(shader, sizeof(infoLog), NULL, infoLog);
+        printf("%s", infoLog);
+        exit(1);
+    }
+}
+
+static GLuint initShader(GLenum type, const char* path){
     const char* source = readFile(path);
 
     GLuint shader = glCreateShader(type);
@@ -56,19 +56,43 @@ GLuint initShader(GLenum type, const char* path){
     return shader;
 }
 
-void checkProgramInitStatus(GLuint program){
+static void checkProgramInitStatus(ShaderProgram program){
     int success;
     char infoLog[512];
-    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    glGetProgramiv(program.id, GL_LINK_STATUS, &success);
 
     if(!success){
-        glGetProgramInfoLog(program, sizeof(infoLog), NULL, infoLog);
+        glGetProgramInfoLog(program.id, sizeof(infoLog), NULL, infoLog);
         printf("%s", infoLog);
+        exit(1);
     }
 }
 
-void printProgramLog(GLuint program){
+void printProgramLog(ShaderProgram program){
     char infoLog[512];
-    glGetProgramInfoLog(program, sizeof(infoLog), NULL, infoLog);
+    glGetProgramInfoLog(program.id, sizeof(infoLog), NULL, infoLog);
     printf("%s", infoLog);
+}
+
+
+
+ShaderProgram initShaderProgram(const char* vertShaderPath, const char* fragShaderPath){
+    ShaderProgram program;
+    program.id = glCreateProgram();
+
+    GLuint vertShader = initShader(GL_VERTEX_SHADER, vertShaderPath);
+    GLuint fragShader = initShader(GL_FRAGMENT_SHADER, fragShaderPath);
+
+    glAttachShader(program.id, fragShader);
+    glAttachShader(program.id, vertShader);
+    glLinkProgram(program.id);
+
+    glDeleteShader(fragShader);
+    glDeleteShader(vertShader);
+
+    glFrontFace(GL_CW);
+
+    checkProgramInitStatus(program);
+
+    return program;
 }
