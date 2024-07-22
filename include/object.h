@@ -5,18 +5,18 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#define OBJECT_DRAW_TYPE GL_UNSIGNED_INT
+#define OBJECT_DRAW_MODE GL_TRIANGLES
+
 typedef struct {
     GLuint vao;
     GLuint vbo;
     GLuint ebo;
-
+    GLuint texture;
     int count;
-    GLenum drawType;
-    GLenum drawMode;
-
-
-
 } Object;
 
-void object_init_vao(Object* object, float* vertices, int* indices);
+void initializeObject(Object* object, float* vertices, int* indices);
+void loadObjectTexture(Object* object, const char* image_path);
+void drawObject(Object* object);
 
