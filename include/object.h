@@ -16,7 +16,7 @@ typedef struct {
     int count;
 } Object;
 
-void initializeObject(Object* object, float* vertices, int* indices);
+void initializeObject(Object* object, float* vertices, GLsizeiptr vertexSize, int* indices, GLsizeiptr indexSize, int count);
 void loadObjectTexture(Object* object, const char* image_path);
 void drawObject(Object* object);
 

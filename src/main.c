@@ -64,8 +64,8 @@ static void shaderLoop(){
     };
 
     ShaderProgram program = initShaderProgram(vertSourcePath, fragSourcePath);
-    Object* catTriangle;
-    initializeObject(catTriangle, vertices, indices);
+    Object* catTriangle = malloc(sizeof (Object));
+    initializeObject(catTriangle, vertices, sizeof(vertices),indices, sizeof(indices), 6);
     loadObjectTexture(catTriangle, texturePath);
 
     // Initialize Matrix Math inputs
@@ -94,7 +94,7 @@ static void shaderLoop(){
         processInput(window);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        drawObject(catTriangle);
+
 
         mat4 newTranslationMatrix = GLM_MAT4_IDENTITY_INIT;
 
@@ -103,6 +103,8 @@ static void shaderLoop(){
         glm_rotate_z(newTranslationMatrix, glm_rad(angle), newTranslationMatrix);
         glm_scale(newTranslationMatrix, scaleVector);
         setUniformMatrix4fv(program, "transform", newTranslationMatrix[0]);
+
+        drawObject(catTriangle);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

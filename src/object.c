@@ -3,18 +3,20 @@
 
 #include "object.h"
 
-void initializeObject(Object* object, float* vertices, int* indices){
+void initializeObject(Object* object, float* vertices, GLsizeiptr vertexSize, int* indices, GLsizeiptr indexSize, int count){
     glGenVertexArrays(1, &object->vao);
     glBindVertexArray(object->vao);
 
+    object->count = count;
+
     glGenBuffers(1, &object->vbo);
     glBindBuffer(GL_ARRAY_BUFFER, object->vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertexSize, vertices, GL_STATIC_DRAW);
 
     // Element Buffer Object
     glGenBuffers(1, &object->ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, object->ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexSize, indices, GL_STATIC_DRAW);
 
     // Position Attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) 0);
@@ -51,6 +53,7 @@ void loadObjectTexture(Object* object, const char* image_path){
 }
 
 void drawObject(Object* object){
+
     glBindVertexArray(object->vao);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, object->ebo);
     glBindTexture(GL_TEXTURE_2D, object->texture);
